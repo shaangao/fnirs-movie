@@ -18,6 +18,7 @@ fnirs = 0
 testRun = 1   # if testRun: 'g' to force-end videos
 
 
+
 ####################################
 ############ INITIALIZE ############
 ####################################
@@ -32,8 +33,9 @@ expName = 'fnirs-movie'  # from the Builder filename that created this script
 expInfo = {'participant': ''}
 dfTimeStamps = pd.read_csv('data_template.csv')    # store ppt ID and time stamps. will be exported to csv.
 
-endExpNow = False  # flag for 'escape' or other condition => quit the exp
+# endExpNow = False  # flag for 'escape' or other condition => quit the exp
 frameTolerance = 0.001  # how close to onset before 'same' frame
+
 
 
 ####################################
@@ -68,7 +70,7 @@ logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a f
 
 # set up window
 win = visual.Window(
-    size=[1536, 960], fullscr=True, screen=0, 
+    size=[1536, 960], fullscr=False, screen=0, 
     winType='pyglet', allowStencil=False,
     monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
     blendMode='avg', useFBO=True, 
@@ -176,7 +178,7 @@ keyRespGo_2 = keyboard.Keyboard()
 
 ############# MAIN #############
 
-# Create some handy timers
+# Create timers
 globalClock = core.Clock()  # to track the time since experiment started
 routineTimer = core.Clock()  # to track time remaining of each (possibly non-slip) routine 
 
@@ -500,6 +502,7 @@ while continueRoutine and routineTimer.getTime() < 10.0:
 
         # record time
         dfTimeStamps.loc[0,'countdownStart'] = mainExpClock.getTime()
+        dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
         # push fnirs sample
         if fnirs:
             NIRx_trigger.push_sample([1])
@@ -543,6 +546,7 @@ for thisComponent in countdownComponents:
         thisComponent.setAutoDraw(False)
 # record time
 dfTimeStamps.loc[0,'countdownEnd'] = mainExpClock.getTime()
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
 # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
 if routineForceEnded:
     routineTimer.reset()
@@ -592,6 +596,7 @@ while continueRoutine:
         
         # record time
         dfTimeStamps.loc[0,'video1Start'] = mainExpClock.getTime()
+        dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
         # push fnirs sample
         if fnirs:
             NIRx_trigger.push_sample([2])
@@ -646,6 +651,7 @@ for thisComponent in movie1Components:
 sherlock1.stop()
 # record time
 dfTimeStamps.loc[0,'video1End'] = mainExpClock.getTime()
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
 # check responses
 if keyRespGoDebug.keys in ['', [], None]:  # No response was made
     keyRespGoDebug.keys = None
@@ -699,6 +705,7 @@ while continueRoutine:
 
         # record time
         dfTimeStamps.loc[0,'video2Start'] = mainExpClock.getTime()
+        dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
         # push fnirs sample
         if fnirs:
             NIRx_trigger.push_sample([3])
@@ -753,6 +760,7 @@ for thisComponent in movie2Components:
 sherlock2.stop()
 # record time
 dfTimeStamps.loc[0,'video2End'] = mainExpClock.getTime()
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
 # check responses
 if keyRespGoDebug2.keys in ['', [], None]:  # No response was made
     keyRespGoDebug2.keys = None
@@ -865,7 +873,7 @@ routineTimer.reset()
 # and win.timeOnFlip() tasks get executed before quitting
 win.flip()
 
-dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)
+# dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)
 
 # # these shouldn't be strictly necessary (should auto-save)
 # thisExp.saveAsWideText(filename+'.csv', delim='auto')
