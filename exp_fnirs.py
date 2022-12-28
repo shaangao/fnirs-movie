@@ -68,7 +68,7 @@ logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a f
 
 # set up window
 win = visual.Window(
-    size=[1536, 960], fullscr=False, screen=0, 
+    size=[1536, 960], fullscr=True, screen=0, 
     winType='pyglet', allowStencil=False,
     monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
     blendMode='avg', useFBO=True, 
@@ -601,24 +601,25 @@ while continueRoutine:
     if sherlock1.status == FINISHED:  # force-end the routine
         continueRoutine = False
     
-    # *keyRespGoDebug* updates
-    if keyRespGoDebug.status == NOT_STARTED and t >= 0.0-frameTolerance:
-        # keep track of start time/frame for later
-        keyRespGoDebug.frameNStart = frameN  # exact frame index
-        keyRespGoDebug.tStart = t  # local t and not account for scr refresh
-        keyRespGoDebug.tStartRefresh = tThisFlipGlobal  # on global time
-        win.timeOnFlip(keyRespGoDebug, 'tStartRefresh')  # time at next scr refresh
-        keyRespGoDebug.status = STARTED
-        # keyboard checking is just starting
-        keyRespGoDebug.clock.reset()  # now t=0
-    if keyRespGoDebug.status == STARTED:
-        theseKeys = keyRespGoDebug.getKeys(keyList=['g'], waitRelease=False)
-        _keyRespGoDebug_allKeys.extend(theseKeys)
-        if len(_keyRespGoDebug_allKeys):
-            keyRespGoDebug.keys = _keyRespGoDebug_allKeys[-1].name  # just the last key pressed
-            keyRespGoDebug.rt = _keyRespGoDebug_allKeys[-1].rt
-            # a response ends the routine
-            continueRoutine = False
+    if testRun:
+        # *keyRespGoDebug* updates
+        if keyRespGoDebug.status == NOT_STARTED and t >= 0.0-frameTolerance:
+            # keep track of start time/frame for later
+            keyRespGoDebug.frameNStart = frameN  # exact frame index
+            keyRespGoDebug.tStart = t  # local t and not account for scr refresh
+            keyRespGoDebug.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(keyRespGoDebug, 'tStartRefresh')  # time at next scr refresh
+            keyRespGoDebug.status = STARTED
+            # keyboard checking is just starting
+            keyRespGoDebug.clock.reset()  # now t=0
+        if keyRespGoDebug.status == STARTED:
+            theseKeys = keyRespGoDebug.getKeys(keyList=['g'], waitRelease=False)
+            _keyRespGoDebug_allKeys.extend(theseKeys)
+            if len(_keyRespGoDebug_allKeys):
+                keyRespGoDebug.keys = _keyRespGoDebug_allKeys[-1].name  # just the last key pressed
+                keyRespGoDebug.rt = _keyRespGoDebug_allKeys[-1].rt
+                # a response ends the routine
+                continueRoutine = False
     
     # # check for quit (typically the Esc key)
     # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
@@ -707,24 +708,25 @@ while continueRoutine:
     if sherlock2.status == FINISHED:  # force-end the routine
         continueRoutine = False
     
-    # *keyRespGoDebug2* updates
-    if keyRespGoDebug2.status == NOT_STARTED and t >= 0.0-frameTolerance:
-        # keep track of start time/frame for later
-        keyRespGoDebug2.frameNStart = frameN  # exact frame index
-        keyRespGoDebug2.tStart = t  # local t and not account for scr refresh
-        keyRespGoDebug2.tStartRefresh = tThisFlipGlobal  # on global time
-        win.timeOnFlip(keyRespGoDebug2, 'tStartRefresh')  # time at next scr refresh
-        keyRespGoDebug2.status = STARTED
-        # keyboard checking is just starting
-        keyRespGoDebug2.clock.reset()  # now t=0
-    if keyRespGoDebug2.status == STARTED:
-        theseKeys = keyRespGoDebug2.getKeys(keyList=['g'], waitRelease=False)
-        _keyRespGoDebug2_allKeys.extend(theseKeys)
-        if len(_keyRespGoDebug2_allKeys):
-            keyRespGoDebug2.keys = _keyRespGoDebug2_allKeys[-1].name  # just the last key pressed
-            keyRespGoDebug2.rt = _keyRespGoDebug2_allKeys[-1].rt
-            # a response ends the routine
-            continueRoutine = False
+    if testRun:
+        # *keyRespGoDebug2* updates
+        if keyRespGoDebug2.status == NOT_STARTED and t >= 0.0-frameTolerance:
+            # keep track of start time/frame for later
+            keyRespGoDebug2.frameNStart = frameN  # exact frame index
+            keyRespGoDebug2.tStart = t  # local t and not account for scr refresh
+            keyRespGoDebug2.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(keyRespGoDebug2, 'tStartRefresh')  # time at next scr refresh
+            keyRespGoDebug2.status = STARTED
+            # keyboard checking is just starting
+            keyRespGoDebug2.clock.reset()  # now t=0
+        if keyRespGoDebug2.status == STARTED:
+            theseKeys = keyRespGoDebug2.getKeys(keyList=['g'], waitRelease=False)
+            _keyRespGoDebug2_allKeys.extend(theseKeys)
+            if len(_keyRespGoDebug2_allKeys):
+                keyRespGoDebug2.keys = _keyRespGoDebug2_allKeys[-1].name  # just the last key pressed
+                keyRespGoDebug2.rt = _keyRespGoDebug2_allKeys[-1].rt
+                # a response ends the routine
+                continueRoutine = False
     
     # # check for quit (typically the Esc key)
     # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
