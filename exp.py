@@ -64,6 +64,7 @@ if expInfo['frameRate'] != None:
     frameDur = 1.0 / round(expInfo['frameRate'])
 else:
     frameDur = 1.0 / 60.0  # could not measure, so guess
+
 # --- Setup input devices ---
 ioConfig = {}
 

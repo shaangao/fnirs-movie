@@ -1,58 +1,74 @@
-# from psychopy import locale_setup
-# from psychopy import prefs
 from psychopy import sound, gui, visual, core, data, event, logging, clock, colors, layout
 from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
                                 STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
 import psychopy.iohub as io
 from psychopy.hardware import keyboard
 
-import numpy as np
-# from numpy import (sin, cos, tan, log, log10, pi, average,
-                #    sqrt, std, deg2rad, rad2deg, linspace, asarray)
-# from numpy.random import random, randint, normal, shuffle, choice as randchoice
+# import numpy as np
+import pandas as pd
 import os
-# import sys  # to get file system encoding
 
 
+
+####################################
+########## MODE SWITCHES ###########
+####################################
+
+fnirs = 0
+testRun = 1   # if testRun: 'g' to force-end videos
+
+
+####################################
+############ INITIALIZE ############
+####################################
 
 # Ensure that relative paths start from the same directory as this script
 _thisDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(_thisDir)
+
 # Store info about the experiment session
 psychopyVersion = '2022.2.4'
-expName = 'exp'  # from the Builder filename that created this script
-expInfo = {
-    'participant': '',
-}
-# --- Show participant info dialog --
-dlg = gui.DlgFromDict(dictionary=expInfo, sortKeys=False, title=expName)
-if dlg.OK == False:
-    core.quit()  # user pressed cancel
-expInfo['date'] = data.getDateStr()  # add a simple timestamp
-expInfo['expName'] = expName
-expInfo['psychopyVersion'] = psychopyVersion
-
-# Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
-filename = _thisDir + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expName, expInfo['date'])
-
-# An ExperimentHandler isn't essential but helps with data saving
-thisExp = data.ExperimentHandler(name=expName, version='',
-    extraInfo=expInfo, runtimeInfo=None,
-    originPath='/Users/apple/Documents/GitHub/fnirs-movie-watching/exp.py',
-    savePickle=True, saveWideText=True,
-    dataFileName=filename)
-# save a log file for detail verbose info
-logFile = logging.LogFile(filename+'.log', level=logging.EXP)
-logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
+expName = 'fnirs-movie'  # from the Builder filename that created this script
+expInfo = {'participant': ''}
+dfTimeStamps = pd.read_csv('data_template.csv')    # store ppt ID and time stamps. will be exported to csv.
 
 endExpNow = False  # flag for 'escape' or other condition => quit the exp
 frameTolerance = 0.001  # how close to onset before 'same' frame
 
-# Start Code - component code to be run after the window creation
 
-# --- Setup the Window ---
+####################################
+############# TIMELINE #############
+####################################
+
+
+############# PREP #############
+
+# get participant ID via dialog
+dlg = gui.DlgFromDict(dictionary=expInfo, sortKeys=False, title='Enter Participant ID')
+if not dlg.OK: core.quit()  # if user pressed cancel
+
+# data file name stem = absolute path + participant_date (later add .psyexp, .csv, .log, etc)
+expInfo['date'] = data.getDateStr()
+# expInfo['expName'] = expName
+# expInfo['psychopyVersion'] = psychopyVersion
+dfTimeStamps.loc[0,'id'] = expInfo['participant']
+filename = os.path.dirname(os.path.abspath(__file__))\
+            + os.sep + u'data/%s_%s' % (expInfo['participant'], expInfo['date'])
+
+# An ExperimentHandler isn't essential but helps with data saving
+thisExp = data.ExperimentHandler(name=expName, version='',
+    extraInfo=expInfo, runtimeInfo=None,
+    # originPath='/Users/apple/Documents/GitHub/fnirs-movie-watching/exp.py',
+    savePickle=True, saveWideText=True,
+    dataFileName=filename)
+
+# save a log file for detail verbose info
+logFile = logging.LogFile(filename+'.log', level=logging.EXP)
+logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
+
+# set up window
 win = visual.Window(
-    size=[1536, 960], fullscr=True, screen=0, 
+    size=[1536, 960], fullscr=False, screen=0, 
     winType='pyglet', allowStencil=False,
     monitor='testMonitor', color=[-1.0000, -1.0000, -1.0000], colorSpace='rgb',
     blendMode='avg', useFBO=True, 
@@ -64,20 +80,28 @@ if expInfo['frameRate'] != None:
     frameDur = 1.0 / round(expInfo['frameRate'])
 else:
     frameDur = 1.0 / 60.0  # could not measure, so guess
-# --- Setup input devices ---
+
+# set up keyboard
 ioConfig = {}
-
-# Setup iohub keyboard
 ioConfig['Keyboard'] = dict(use_keymap='psychopy')
-
 ioSession = '1'
 if 'session' in expInfo:
     ioSession = str(expInfo['session'])
 ioServer = io.launchHubServer(window=win, **ioConfig)
-eyetracker = None
-
+# eyetracker = None
 # create a default keyboard (e.g. to check for escape)
 defaultKeyboard = keyboard.Keyboard(backend='iohub')
+
+# set up NIRx_trigger
+if fnirs:
+    from pylsl import StreamInfo, StreamOutlet
+    lslInfo = StreamInfo(name='Trigger', type='Markers', channel_count=1, channel_format='int32')
+    NIRx_trigger = StreamOutlet(lslInfo)
+    print('You should be able to connect NIRx.')
+
+
+
+############# COMPONENTS #############
 
 # --- Initialize components for Routine "checkApparatus" ---
 instrApparatus = visual.TextStim(win=win, name='instrApparatus',
@@ -148,9 +172,14 @@ instrFinish = visual.TextStim(win=win, name='instrFinish',
     depth=0.0);
 keyRespGo_2 = keyboard.Keyboard()
 
+
+
+############# MAIN #############
+
 # Create some handy timers
 globalClock = core.Clock()  # to track the time since experiment started
 routineTimer = core.Clock()  # to track time remaining of each (possibly non-slip) routine 
+
 
 # --- Prepare to start Routine "checkApparatus" ---
 continueRoutine = True
@@ -210,9 +239,9 @@ while continueRoutine:
             # a response ends the routine
             continueRoutine = False
     
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        core.quit()
+    # # check for quit (typically the Esc key)
+    # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    #     core.quit()
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -241,6 +270,14 @@ if keyRespGo.keys != None:  # we had a response
 thisExp.nextEntry()
 # the Routine "checkApparatus" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
+
+
+# timer for tracking time stamps
+mainExpClock = core.Clock()
+# push fnirs sample -- when?
+if fnirs:
+    NIRx_trigger.push_sample([0])
+
 
 # --- Prepare to start Routine "taskIntro" ---
 continueRoutine = True
@@ -300,9 +337,9 @@ while continueRoutine:
             # a response ends the routine
             continueRoutine = False
     
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        core.quit()
+    # # check for quit (typically the Esc key)
+    # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    #     core.quit()
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -331,6 +368,7 @@ if keyRespReturn.keys != None:  # we had a response
 thisExp.nextEntry()
 # the Routine "taskIntro" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
+
 
 # --- Prepare to start Routine "ready" ---
 continueRoutine = True
@@ -390,9 +428,9 @@ while continueRoutine:
             # a response ends the routine
             continueRoutine = False
     
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        core.quit()
+    # # check for quit (typically the Esc key)
+    # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    #     core.quit()
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -421,6 +459,7 @@ if keyRespReturn_2.keys != None:  # we had a response
 thisExp.nextEntry()
 # the Routine "ready" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
+
 
 # --- Prepare to start Routine "countdown" ---
 continueRoutine = True
@@ -458,7 +497,16 @@ while continueRoutine and routineTimer.getTime() < 10.0:
         win.timeOnFlip(textCountdown, 'tStartRefresh')  # time at next scr refresh
         # add timestamp to datafile
         thisExp.timestampOnFlip(win, 'textCountdown.started')
+
+        # record time
+        dfTimeStamps.loc[0,'countdownStart'] = mainExpClock.getTime()
+        # push fnirs sample
+        if fnirs:
+            NIRx_trigger.push_sample([1])
+
         textCountdown.setAutoDraw(True)
+        
+        
     if textCountdown.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
         if tThisFlipGlobal > textCountdown.tStartRefresh + 10-frameTolerance:
@@ -471,9 +519,9 @@ while continueRoutine and routineTimer.getTime() < 10.0:
     if textCountdown.status == STARTED:  # only update if drawing
         textCountdown.setText(str(10-int(t)), log=False)
     
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        core.quit()
+    # # check for quit (typically the Esc key)
+    # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    #     core.quit()
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -493,11 +541,14 @@ while continueRoutine and routineTimer.getTime() < 10.0:
 for thisComponent in countdownComponents:
     if hasattr(thisComponent, "setAutoDraw"):
         thisComponent.setAutoDraw(False)
+# record time
+dfTimeStamps.loc[0,'countdownEnd'] = mainExpClock.getTime()
 # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
 if routineForceEnded:
     routineTimer.reset()
 else:
     routineTimer.addTime(-10.000000)
+
 
 # --- Prepare to start Routine "movie1" ---
 continueRoutine = True
@@ -538,6 +589,13 @@ while continueRoutine:
         win.timeOnFlip(sherlock1, 'tStartRefresh')  # time at next scr refresh
         # add timestamp to datafile
         thisExp.timestampOnFlip(win, 'sherlock1.started')
+        
+        # record time
+        dfTimeStamps.loc[0,'video1Start'] = mainExpClock.getTime()
+        # push fnirs sample
+        if fnirs:
+            NIRx_trigger.push_sample([2])
+        
         sherlock1.setAutoDraw(True)
         sherlock1.play()
     if sherlock1.status == FINISHED:  # force-end the routine
@@ -562,9 +620,9 @@ while continueRoutine:
             # a response ends the routine
             continueRoutine = False
     
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        core.quit()
+    # # check for quit (typically the Esc key)
+    # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    #     core.quit()
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -585,6 +643,8 @@ for thisComponent in movie1Components:
     if hasattr(thisComponent, "setAutoDraw"):
         thisComponent.setAutoDraw(False)
 sherlock1.stop()
+# record time
+dfTimeStamps.loc[0,'video1End'] = mainExpClock.getTime()
 # check responses
 if keyRespGoDebug.keys in ['', [], None]:  # No response was made
     keyRespGoDebug.keys = None
@@ -594,6 +654,7 @@ if keyRespGoDebug.keys != None:  # we had a response
 thisExp.nextEntry()
 # the Routine "movie1" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
+
 
 # --- Prepare to start Routine "movie2" ---
 continueRoutine = True
@@ -634,6 +695,13 @@ while continueRoutine:
         win.timeOnFlip(sherlock2, 'tStartRefresh')  # time at next scr refresh
         # add timestamp to datafile
         thisExp.timestampOnFlip(win, 'sherlock2.started')
+
+        # record time
+        dfTimeStamps.loc[0,'video2Start'] = mainExpClock.getTime()
+        # push fnirs sample
+        if fnirs:
+            NIRx_trigger.push_sample([3])
+
         sherlock2.setAutoDraw(True)
         sherlock2.play()
     if sherlock2.status == FINISHED:  # force-end the routine
@@ -658,9 +726,9 @@ while continueRoutine:
             # a response ends the routine
             continueRoutine = False
     
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        core.quit()
+    # # check for quit (typically the Esc key)
+    # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    #     core.quit()
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -681,6 +749,8 @@ for thisComponent in movie2Components:
     if hasattr(thisComponent, "setAutoDraw"):
         thisComponent.setAutoDraw(False)
 sherlock2.stop()
+# record time
+dfTimeStamps.loc[0,'video2End'] = mainExpClock.getTime()
 # check responses
 if keyRespGoDebug2.keys in ['', [], None]:  # No response was made
     keyRespGoDebug2.keys = None
@@ -690,6 +760,7 @@ if keyRespGoDebug2.keys != None:  # we had a response
 thisExp.nextEntry()
 # the Routine "movie2" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
+
 
 # --- Prepare to start Routine "finish" ---
 continueRoutine = True
@@ -728,6 +799,9 @@ while continueRoutine:
         instrFinish.tStart = t  # local t and not account for scr refresh
         instrFinish.tStartRefresh = tThisFlipGlobal  # on global time
         win.timeOnFlip(instrFinish, 'tStartRefresh')  # time at next scr refresh
+        # push fnirs sample
+        if fnirs:
+            NIRx_trigger.push_sample([4])
         instrFinish.setAutoDraw(True)
     
     # *keyRespGo_2* updates
@@ -749,9 +823,9 @@ while continueRoutine:
             # a response ends the routine
             continueRoutine = False
     
-    # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
-        core.quit()
+    # # check for quit (typically the Esc key)
+    # if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    #     core.quit()
     
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -781,18 +855,21 @@ thisExp.nextEntry()
 # the Routine "finish" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
 
-# --- End experiment ---
+
+
+############# END #############
+
 # Flip one final time so any remaining win.callOnFlip() 
 # and win.timeOnFlip() tasks get executed before quitting
 win.flip()
 
-# these shouldn't be strictly necessary (should auto-save)
-thisExp.saveAsWideText(filename+'.csv', delim='auto')
-thisExp.saveAsPickle(filename)
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)
+
+# # these shouldn't be strictly necessary (should auto-save)
+# thisExp.saveAsWideText(filename+'.csv', delim='auto')
+# thisExp.saveAsPickle(filename)
 logging.flush()
 # make sure everything is closed down
-if eyetracker:
-    eyetracker.setConnectionState(False)
 thisExp.abort()  # or data files will save again on exit
 win.close()
 core.quit()
