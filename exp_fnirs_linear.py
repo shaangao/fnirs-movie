@@ -169,6 +169,13 @@ instrRecording = visual.TextStim(win=win, name='instrRecording',
     # depth=0.0
 )
 
+# circle: central white dot
+dotCentralWhite = visual.Circle(win=win, name='dotCentralWhite',
+    radius=10, edges=32, units='pix',
+    pos=[0, 0],
+    fillColor='white', color='white', colorSpace='rgb'
+)
+
 # instruction: finish
 instrFinish = visual.TextStim(win=win, name='instrFinish',
     text="Thank you for your participation! \n\n\n\n\n Please use the pager to call the experimenter back in",
@@ -231,7 +238,7 @@ if fnirs:
     NIRx_trigger.push_sample([2])
 # show video: sherlock 2
 while sherlock2.status != visual.FINISHED:
-    sherlock1.draw()
+    sherlock2.draw()
     win.flip()
 # record end time
 dfTimeStamps.loc[0,'video2End'] = mainExpClock.getTime()
@@ -254,8 +261,13 @@ dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial d
 if fnirs:
     NIRx_trigger.push_sample([4])
 
-# show instruction: recording
-instrRecording.draw()
+# # show instruction: recording
+# instrRecording.draw()
+# win.flip()
+# keys = event.waitKeys(keyList=["return"])
+
+# show central white dot during recording
+dotCentralWhite.draw()
 win.flip()
 keys = event.waitKeys(keyList=["return"])
 
