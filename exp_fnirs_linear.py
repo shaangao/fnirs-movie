@@ -9,6 +9,8 @@ import os
 import time
 from psychopy.sound import Microphone
 from psychopy.hardware.keyboard import Keyboard
+from pylsl import StreamInfo, StreamOutlet
+
 
 
 
@@ -16,7 +18,7 @@ from psychopy.hardware.keyboard import Keyboard
 ########## MODE SWITCHES ###########
 ####################################
 
-fnirs = 0   # 0: no fnirs; 1: with fnirs
+fnirs = 1   # 0: no fnirs; 1: with fnirs
 
 
 
@@ -79,7 +81,7 @@ mic = Microphone(streamBufferSecs=1000.0,
 )
 # fnirs
 if fnirs:
-    from pylsl import StreamInfo, StreamOutlet
+#    from pylsl import StreamInfo, StreamOutlet
     lslInfo = StreamInfo(name='Trigger', type='Markers', channel_count=1, channel_format='int32')
     NIRx_trigger = StreamOutlet(lslInfo)    # initialize stream
     print('You should be able to connect NIRx.')
@@ -126,7 +128,8 @@ instrVideoReady = visual.TextStim(win=win, name='instrVideoReady',
 # video: sherlock 1
 sherlock1 = visual.MovieStim3(
     win, name='sherlock1',
-    filename='media/sherlock/sherlock_cartoon_part1.m4v',
+    filename='media/sherlock/sherlock_cartoon_part1.mp4',
+#    filename='media/sherlock/part1_short_tail.mp4',
     # movieLib='ffpyplayer',    # movieLib not available in earlier version of psychopy
     # loop=False, volume=1.0,
     size = (800,500), units = 'pix',
@@ -134,10 +137,23 @@ sherlock1 = visual.MovieStim3(
     # ori=0.0, anchor='center',opacity=None, contrast=1.0,
 )
 
+# instruction: break
+instrBreak = visual.TextStim(win=win, name='instrBreak',
+    text="You are done with the first part of the episode. Please feel free to take a short break. \nWhenever you are ready, press ENTER to continue",
+    font='Arial',
+    pos=[0, 0], height=24,color='white', units='pix', colorSpace='rgb',
+    wrapWidth=win.size[0] * 0.9
+    # units='norm', pos=(0, 0), height=0.06, wrapWidth=100.0, ori=0.0, 
+    # color='white', colorSpace='rgb', opacity=None, 
+    # languageStyle='LTR',
+    # depth=0.0
+)
+
 # video: sherlock 2
 sherlock2 = visual.MovieStim3(
     win, name='sherlock2',
-    filename='media/sherlock/sherlock_cartoon_part2.m4v', 
+    filename='media/sherlock/sherlock_cartoon_part2.mp4', 
+#    filename='media/sherlock/part2_short_tail.mp4',
     # movieLib='ffpyplayer',    # movieLib not available in earlier version of psychopy
     # loop=False, volume=1.0,
     size = (800,500), units = 'pix',
@@ -147,27 +163,27 @@ sherlock2 = visual.MovieStim3(
 
 # instruction: record intro
 instrRecordIntro = visual.TextStim(win=win, name='instrRecordIntro',
-    text="You just watched the Sherlock show. \n\nNow, we would like you to recount, in your own words, the events in the show in the original order they were viewed in, in as much detail as possible. \n\nSpeak for at least 10 min if possible -- but the longer the better. (You are allowed to speak for as long as you wish.) \nPlease verbally indicate when you are finished by saying, for example, \"I'm done.\" \n\nCompleteness and detail are more important than temporal order. \nIf at any point you realized that you missed something, feel free to return to it. \n\n\n\nPress ENTER when you are ready to begin audio recording",
+    text="You just watched the Sherlock show. \n\nNow, we would like you to recount, in your own words, the events in the show in the original order they were viewed in, in as much detail as possible. \n\nSpeak for at least 10 min if possible -- but the longer the better. (You are allowed to speak for as long as you wish.) \nPlease verbally indicate when you are finished by saying, for example, \"I'm done.\" \n\nCompleteness and detail are more important than temporal order. \nIf at any point you realized that you missed something, feel free to return to it. \n\n\n\nPress ENTER to begin audio recording",
     font='Arial',
     pos=[0, 0], height=24,color='white', units='pix', colorSpace='rgb',
-    wrapWidth=win.size[0] * 0.5
+    wrapWidth=win.size[0] * 0.3
     # units='norm', pos=(0, 0), height=0.06, wrapWidth=100.0, ori=0.0, 
     # color='white', colorSpace='rgb', opacity=None, 
     # languageStyle='LTR',
     # depth=0.0
 )
 
-# instruction: recording
-instrRecording = visual.TextStim(win=win, name='instrRecording',
-    text="RECORDING... \n\n\n\nVerbally indicate when you are finished and then press ENTER to stop recording",
-    font='Arial',
-    pos=[0, 0], height=24,color='white', units='pix', colorSpace='rgb',
-    wrapWidth=win.size[0] * 0.9
-    # units='norm', pos=(0, 0), height=0.06, wrapWidth=100.0, ori=0.0, 
-    # color='white', colorSpace='rgb', opacity=None, 
-    # languageStyle='LTR',
-    # depth=0.0
-)
+# # instruction: recording
+# instrRecording = visual.TextStim(win=win, name='instrRecording',
+#     text="RECORDING... \n\n\n\nVerbally indicate when you are finished and then press ENTER to stop recording",
+#     font='Arial',
+#     pos=[0, 0], height=24,color='white', units='pix', colorSpace='rgb',
+#     wrapWidth=win.size[0] * 0.9
+#     # units='norm', pos=(0, 0), height=0.06, wrapWidth=100.0, ori=0.0, 
+#     # color='white', colorSpace='rgb', opacity=None, 
+#     # languageStyle='LTR',
+#     # depth=0.0
+# )
 
 # circle: central white dot
 dotCentralWhite = visual.Circle(win=win, name='dotCentralWhite',
@@ -228,6 +244,14 @@ while sherlock1.status != visual.FINISHED:
 # record end time
 dfTimeStamps.loc[0,'video1End'] = mainExpClock.getTime()
 dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
+# push fnirs sample: end of video 1
+if fnirs:
+    NIRx_trigger.push_sample([2])
+
+# show instruction: break
+instrBreak.draw()
+win.flip()
+keys = event.waitKeys(keyList=["return"])
 
 # video 2
 # record start time
@@ -235,7 +259,7 @@ dfTimeStamps.loc[0,'video2Start'] = mainExpClock.getTime()
 dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
 # push fnirs sample: start of video 2
 if fnirs:
-    NIRx_trigger.push_sample([2])
+    NIRx_trigger.push_sample([3])
 # show video: sherlock 2
 while sherlock2.status != visual.FINISHED:
     sherlock2.draw()
@@ -245,7 +269,7 @@ dfTimeStamps.loc[0,'video2End'] = mainExpClock.getTime()
 dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
 # push fnirs sample: end of video 2
 if fnirs:
-    NIRx_trigger.push_sample([3])
+    NIRx_trigger.push_sample([4])
 
 # show instruction: record intro
 instrRecordIntro.draw()
@@ -259,7 +283,7 @@ dfTimeStamps.loc[0,'recordStart'] = mainExpClock.getTime()
 dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
 # push fnirs sample: start of recording
 if fnirs:
-    NIRx_trigger.push_sample([4])
+    NIRx_trigger.push_sample([5])
 
 # # show instruction: recording
 # instrRecording.draw()
@@ -278,7 +302,7 @@ dfTimeStamps.loc[0,'recordEnd'] = mainExpClock.getTime()
 dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save data
 # push fnirs sample: end of recording
 if fnirs:
-    NIRx_trigger.push_sample([5])
+    NIRx_trigger.push_sample([6])
 # save audio
 audioClip = mic.getRecording()
 audioClip.save(filename + '.wav')
@@ -288,7 +312,7 @@ instrFinish.draw()
 win.flip()
 # push fnirs sample: end of experiment
 if fnirs:
-    NIRx_trigger.push_sample([6])
+    NIRx_trigger.push_sample([7])
 # proceed to end
 keys = event.waitKeys(keyList=["g"])
 
