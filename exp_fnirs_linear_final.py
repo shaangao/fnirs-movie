@@ -18,7 +18,7 @@ from pylsl import StreamInfo, StreamOutlet
 ########## MODE SWITCHES ###########
 ####################################
 
-fnirs = 0   # 0: no fnirs; 1: with fnirs
+fnirs = 1   # 0: no fnirs; 1: with fnirs
 
 
 
@@ -55,7 +55,7 @@ dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)
 # set up window
 win = visual.Window((1920, 1080),
     units='pix',
-    fullscr=False,
+    fullscr=True,
     allowGUI=False,
     monitor='55w_60dist',
     #screen=1,
@@ -163,7 +163,7 @@ sherlock2 = visual.MovieStim3(
 
 # instruction: record intro
 instrRecordIntro = visual.TextStim(win=win, name='instrRecordIntro',
-    text="You just watched the Sherlock show. \n\nNow, we would like you to recount, in your own words, the events in the show in the original order they were viewed in, in as much detail as possible. \n\nSpeak for at least 10 min if possible -- but the longer the better. (You are allowed to speak for as long as you wish.) \nPlease verbally indicate when you are finished by saying, for example, \"I'm done.\" \n\nCompleteness and detail are more important than temporal order. \nIf at any point you realized that you missed something, feel free to return to it. \n\n\n\nPress ENTER to begin audio recording",
+    text="You just watched the Sherlock show. \n\nNow, we would like you to recount, in your own words, the events in the show in the original order they were viewed in, in as much detail as possible. \n\nSpeak for at least 10 min if possible -- but the longer the better. (You are allowed to speak for as long as you wish.) \nPlease verbally indicate when you are finished by saying, for example, \"I'm done.\" \n\nCompleteness and detail are more important than temporal order. \nIf at any point you realized that you missed something, feel free to return to it. \n\n\n\nPress ENTER to begin audio recording \n(The microphone will automatically turn on after you press Enter; please do NOT touch/move the microphone. There will be a white dot on the screen during recording. When you are finished speaking, press Enter again to stop recording.)",
     font='Arial',
     pos=[0, 0], height=24,color='white', units='pix', colorSpace='rgb',
     wrapWidth=win.size[0] * 0.3
@@ -229,47 +229,47 @@ keys = event.waitKeys(keyList=["return"])
 instrVideoReady.draw()
 win.flip()
 keys = event.waitKeys(keyList=["return"])
-#
-## video 1
-## record start time
-#dfTimeStamps.loc[0,'video1Start'] = mainExpClock.getTime()
-#dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
-## push fnirs sample: start of video 1
-#if fnirs:
-#    NIRx_trigger.push_sample([1])
-## show video: sherlock 1
-#while sherlock1.status != visual.FINISHED:
-#    sherlock1.draw()
-#    win.flip()
-## record end time
-#dfTimeStamps.loc[0,'video1End'] = mainExpClock.getTime()
-#dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
-## push fnirs sample: end of video 1
-#if fnirs:
-#    NIRx_trigger.push_sample([2])
-#
-## show instruction: break
-#instrBreak.draw()
-#win.flip()
-#keys = event.waitKeys(keyList=["return"])
-#
-## video 2
-## record start time
-#dfTimeStamps.loc[0,'video2Start'] = mainExpClock.getTime()
-#dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
-## push fnirs sample: start of video 2
-#if fnirs:
-#    NIRx_trigger.push_sample([3])
-## show video: sherlock 2
-#while sherlock2.status != visual.FINISHED:
-#    sherlock2.draw()
-#    win.flip()
-## record end time
-#dfTimeStamps.loc[0,'video2End'] = mainExpClock.getTime()
-#dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
-## push fnirs sample: end of video 2
-#if fnirs:
-#    NIRx_trigger.push_sample([4])
+
+# video 1
+# record start time
+dfTimeStamps.loc[0,'video1Start'] = mainExpClock.getTime()
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
+# push fnirs sample: start of video 1
+if fnirs:
+    NIRx_trigger.push_sample([1])
+# show video: sherlock 1
+while sherlock1.status != visual.FINISHED:
+    sherlock1.draw()
+    win.flip()
+# record end time
+dfTimeStamps.loc[0,'video1End'] = mainExpClock.getTime()
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
+# push fnirs sample: end of video 1
+if fnirs:
+    NIRx_trigger.push_sample([2])
+
+# show instruction: break
+instrBreak.draw()
+win.flip()
+keys = event.waitKeys(keyList=["return"])
+
+# video 2
+# record start time
+dfTimeStamps.loc[0,'video2Start'] = mainExpClock.getTime()
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
+# push fnirs sample: start of video 2
+if fnirs:
+    NIRx_trigger.push_sample([3])
+# show video: sherlock 2
+while sherlock2.status != visual.FINISHED:
+    sherlock2.draw()
+    win.flip()
+# record end time
+dfTimeStamps.loc[0,'video2End'] = mainExpClock.getTime()
+dfTimeStamps.to_csv(filename + '_timestamps.csv', index=False)  # save partial data
+# push fnirs sample: end of video 2
+if fnirs:
+    NIRx_trigger.push_sample([4])
 
 # show instruction: record intro
 instrRecordIntro.draw()
