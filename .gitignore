@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # media files
-/media/*
+/media/sherlock/*
 
 # data files
 /data/*
